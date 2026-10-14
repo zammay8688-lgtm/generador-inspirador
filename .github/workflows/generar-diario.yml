@@ -5,39 +5,39 @@ on:
     - cron: "0 13 * * *"
   workflow_dispatch:
 
-permission*:
+permissions:
   contents: write
 
 jobs:
-  publi*ar:
+  publicar:
     runs-on: ubuntu-latest
 
-  * steps:
-      - name: Descargar re*ositorio
-        uses: actions/che*kout@v4
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
 
-      - name: Preparar Py*hon
-        uses: actions/setup-py*hon@v5
+      - name: Preparar Python
+        uses: actions/setup-python@v5
         with:
-          pyt*on-version: "3.12"
+          python-version: "3.12"
 
-      - name: *nstalar dependencias
-        run: *ip install -r requirements.txt
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
 
-  *   - name: Generar imagen del día
-*       run: python generar_diario.*y
+      - name: Generar imagen del día
+        run: python generar_diario.py
 
-      - name: Publicar en Faceb*ok
+      - name: Publicar en Facebook
         env:
-          FACEBOOK*PAGE_ID: ${{ secrets.FACEBOOK_PAGE*ID }}
-          FACEBOOK_PAGE_ACCE*S_TOKEN: ${{ secrets.FACEBOOK_PAGE*ACCESS_TOKEN }}
-          META_GRA*H_VERSION: v26.0
-        run: pyth*n publicar_facebook.py
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: v26.0
+        run: python publicar_facebook.py
 
-      - na*e: Guardar resultado en GitHub
-   *    run: |
-          git config us*r.name "generador-diario"
-        * git config user.email "actions@us*rs.noreply.github.com"
-          g*t add imagen-del-dia.png publicaci*n-del-dia.txt
-          git diff -*cached --quiet || git commit -m "G*nerar publicación diaria"
-        * git push
+      - name: Guardar resultado en GitHub
+        run: |
+          git config user.name "generador-diario"
+          git config user.email "actions@users.noreply.github.com"
+          git add imagen-del-dia.png publicacion-del-dia.txt
+          git diff --cached --quiet || git commit -m "Generar publicación diaria"
+          git push
