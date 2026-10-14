@@ -1,70 +1,7 @@
-<!DOCTYPE html>
-<html lang="es-MX">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador diario de inspiración</title>
-  <style>
-    *{box-sizing:border-box} body{margin:0;background:#020617;color:#fff;font-family:Arial,sans-serif;min-height:100vh;padding:22px}
-    .app{max-width:1180px;margin:auto}.top{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:22px;flex-wrap:wrap}
-    h1{font-size:clamp(30px,5vw,52px);margin:6px 0}.sub{color:#cbd5e1}.free{color:#86efac;border:1px solid #22c55e66;background:#22c55e1a;padding:10px 15px;border-radius:999px}
-    .grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:24px}.card{background:#ffffff0d;border:1px solid #ffffff1a;border-radius:24px;padding:18px}
-    canvas{display:block;width:100%;border-radius:18px}.panel h2{margin-top:0}.info{background:#0003;padding:14px;border-radius:14px;color:#cbd5e1}
-    label{display:block;margin:18px 0 7px;color:#cbd5e1}.input{width:100%;padding:13px;border-radius:12px;border:1px solid #ffffff22;background:#0f172a;color:#fff;font-size:16px}
-    button{width:100%;border:0;border-radius:12px;padding:14px;margin-top:12px;font-weight:bold;font-size:16px;cursor:pointer}
-    .secondary{background:#ffffff16;color:#fff}.primary{background:#22d3ee;color:#082f49}.status{font-size:13px;color:#86efac;min-height:30px;margin-top:12px}
-    .small{font-size:13px;color:#94a3b8;line-height:1.5}.badge{color:#fde68a;font-weight:bold;font-size:13px}
-    @media(max-width:850px){.grid{grid-template-columns:1fr}}
-  </style>
-</head>
-<body>
-<div class="app">
-  <div class="top">
-    <div><div class="badge">✨ HERRAMIENTA GRATUITA</div><h1>Generador diario de inspiración</h1><div class="sub">Crea una imagen distinta cada día y descárgala para Facebook.</div></div>
-    <div class="free">✓ Sin suscripciones</div>
-  </div>
-  <div class="grid">
-    <div class="card"><canvas id="canvas" width="1080" height="1080"></canvas></div>
-    <div class="card panel">
-      <h2>Publicación de hoy</h2>
-      <div class="info"><strong id="fechaPanel"></strong><br><span id="numeroFrase"></span></div>
-      <label for="marca">Nombre o firma</label>
-      <input class="input" id="marca" value="Inspira tu día" maxlength="40">
-      <button class="secondary" id="cambiar">🔄 Cambiar diseño y frase</button>
-      <button class="primary" id="descargar">⬇ Descargar PNG</button>
-      <div class="status" id="estado"></div>
-      <p class="small">La fecha se coloca automáticamente. El navegador guarda las frases usadas para reducir repeticiones.</p>
-    </div>
-  </div>
-</div>
-<script>
-const frases=[
-"Cada mañana trae una nueva oportunidad para avanzar.","Los pequeños pasos de hoy construyen los grandes logros de mañana.","Confía en tu proceso, incluso cuando avances lentamente.","Tu actitud puede transformar por completo tu día.","Hoy tienes una nueva oportunidad para hacerlo mejor.","La constancia convierte los sueños en resultados.","No necesitas ser perfecto, solo seguir avanzando.","Cree en ti y en todo lo que todavía puedes lograr.","Cada esfuerzo cuenta, aunque nadie más lo vea.","Tu mejor momento para comenzar es ahora.","La disciplina te acerca a donde la motivación quiere llevarte.","Haz de este día una razón para sentirte orgulloso.","Lo que haces hoy puede mejorar todos tus mañanas.","Avanza con calma, pero nunca abandones tu camino.","Las metas grandes se alcanzan con decisiones pequeñas y constantes.","Tu historia sigue escribiéndose. Haz que hoy cuente.","La paciencia también es una forma de fortaleza.","Atrévete a dar el paso que has estado posponiendo.","Tu esfuerzo de hoy será tu tranquilidad de mañana.","Hoy puede ser el inicio de algo extraordinario.","Todo cambio importante comienza con una decisión valiente.","Respira, reorganiza tus ideas y vuelve a intentarlo.","Un día a la vez también es una forma de llegar lejos.","Celebra tus avances, incluso los que parecen pequeños.","Nunca subestimes el poder de volver a comenzar.","Haz lo mejor que puedas con lo que tienes hoy.","Permite que tus sueños sean más grandes que tus miedos.","La gratitud convierte lo cotidiano en algo extraordinario.","Tu paz también es una prioridad.","Un buen día comienza con una buena intención."
-];
-const temas=[
-["#071952","#35A29F","#FFE17B"],["#3D246C","#F875AA","#FFD6A5"],["#163020","#B6C4B6","#EEF0E5"],["#001C30","#64CCC5","#DAFFFB"],["#111827","#7C3AED","#FDE68A"]];
-const dias=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
-const meses=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-const hoy=new Date(); const clave=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
-let historial={}; try{historial=JSON.parse(localStorage.getItem('historial-frases')||'{}')}catch(e){}
-let indice=historial[clave]?.frase ?? (Math.abs([...clave].reduce((a,c)=>(a*31+c.charCodeAt(0))|0,7))%frases.length);
-let tema=historial[clave]?.tema ?? (hoy.getDate()%temas.length);
-const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),marca=document.getElementById('marca');
-function guardar(){historial[clave]={frase:indice,tema};localStorage.setItem('historial-frases',JSON.stringify(historial));}
-function envolver(texto,max){const palabras=texto.split(' '),lineas=[];let linea='';for(const p of palabras){const prueba=(linea+' '+p).trim();if(ctx.measureText(prueba).width>max&&linea){lineas.push(linea);linea=p}else linea=prueba}if(linea)lineas.push(linea);return lineas}
-function dibujar(){
- const t=temas[tema],g=ctx.createLinearGradient(0,0,1080,1080);g.addColorStop(0,t[0]);g.addColorStop(1,t[1]);ctx.fillStyle=g;ctx.fillRect(0,0,1080,1080);
- ctx.globalAlpha=.13;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(930,120,270,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(100,980,330,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
- ctx.strokeStyle='#ffffff66';ctx.lineWidth=2;ctx.strokeRect(62,62,956,956);ctx.textAlign='center';
- ctx.fillStyle=t[2];ctx.font='600 42px Arial';ctx.fillText(dias[hoy.getDay()].toUpperCase(),540,180);
- ctx.fillStyle='#fff';ctx.font='32px Arial';ctx.fillText(`${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`,540,235);
- ctx.font='bold 60px Georgia';const lineas=envolver(frases[indice],820),lh=80,inicio=520-((lineas.length-1)*lh/2);lineas.forEach((l,i)=>ctx.fillText(l,540,inicio+i*lh));
- ctx.fillStyle=t[2];ctx.fillRect(440,805,200,4);ctx.fillStyle='#fff';ctx.font='bold 30px Arial';ctx.fillText(marca.value||'Inspira tu día',540,885);ctx.font='22px Arial';ctx.fillText('Una pausa para recordar lo importante',540,930);
- document.getElementById('fechaPanel').textContent=`${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]}`;document.getElementById('numeroFrase').textContent=`Frase ${indice+1} de ${frases.length}`;guardar();
-}
-document.getElementById('cambiar').onclick=()=>{const usadas=new Set(Object.values(historial).map(x=>x.frase));let disponibles=frases.map((_,i)=>i).filter(i=>!usadas.has(i));if(!disponibles.length)disponibles=frases.map((_,i)=>i);indice=disponibles[Math.floor(Math.random()*disponibles.length)];tema=(tema+1)%temas.length;dibujar();document.getElementById('estado').textContent='Nueva combinación creada.'};
-document.getElementById('descargar').onclick=()=>{const a=document.createElement('a');a.download=`frase-inspiradora-${clave}.png`;a.href=canvas.toDataURL('image/png');a.click();document.getElementById('estado').textContent='Imagen descargada, lista para publicar.'};
-marca.oninput=dibujar;dibujar();
-</script>
-</body>
-</html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Generador inspirador</title><style>*{box-sizing:border-box}body{margin:0;padding:22px;background:#020617;color:#fff;font-family:Arial}.app{max-width:1150px;margin:auto}.grid{display:grid;grid-template-columns:1fr 350px;gap:22px}.card{background:#ffffff0d;border:1px solid #ffffff1a;border-radius:22px;padding:18px}canvas{width:100%;border-radius:16px}input,button{width:100%;padding:13px;margin-top:10px;border-radius:11px;border:1px solid #ffffff22}input{background:#0f172a;color:white}button{font-weight:bold;cursor:pointer}.primary{background:#22d3ee;color:#082f49}.secondary{background:#ffffff18;color:white}label{display:block;margin-top:15px;color:#cbd5e1}.status{color:#86efac;min-height:30px;margin-top:10px}@media(max-width:800px){.grid{grid-template-columns:1fr}}</style></head><body><div class="app"><h1>Generador diario de inspiración</h1><p>Crea una imagen con fecha, frase y fotografía de fondo, sin pagar suscripciones.</p><div class="grid"><div class="card"><canvas id="c" width="1080" height="1080"></canvas></div><div class="card"><h2>Personalizar</h2><label>Imagen de fondo opcional</label><input id="f" type="file" accept="image/*"><button class="secondary" id="q">Quitar imagen</button><label>Nombre o firma</label><input id="m" value="Inspira tu día" maxlength="40"><button class="secondary" id="x">Cambiar frase y diseño</button><button class="primary" id="d">Descargar PNG</button><div class="status" id="s"></div><p>La imagen elegida se procesa únicamente en tu navegador.</p></div></div></div><script>
+const F=["Cada mañana trae una nueva oportunidad para avanzar.","Los pequeños pasos de hoy construyen los grandes logros de mañana.","Confía en tu proceso, incluso cuando avances lentamente.","Tu actitud puede transformar por completo tu día.","Hoy tienes una nueva oportunidad para hacerlo mejor.","La constancia convierte los sueños en resultados.","No necesitas ser perfecto, solo seguir avanzando.","Cree en ti y en todo lo que todavía puedes lograr.","Cada esfuerzo cuenta, aunque nadie más lo vea.","Tu mejor momento para comenzar es ahora.","Haz de este día una razón para sentirte orgulloso.","Avanza con calma, pero nunca abandones tu camino.","Hoy puede ser el inicio de algo extraordinario.","Respira, reorganiza tus ideas y vuelve a intentarlo.","Celebra tus avances, incluso los que parecen pequeños.","Nunca subestimes el poder de volver a comenzar.","Haz lo mejor que puedas con lo que tienes hoy.","La gratitud convierte lo cotidiano en algo extraordinario.","Tu paz también es una prioridad.","Un buen día comienza con una buena intención."];
+const T=[["#071952","#35A29F","#FFE17B"],["#3D246C","#F875AA","#FFD6A5"],["#163020","#B6C4B6","#EEF0E5"],["#001C30","#64CCC5","#DAFFFB"],["#111827","#7C3AED","#FDE68A"]],D=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const ahora=new Date(),key=`${ahora.getFullYear()}-${ahora.getMonth()+1}-${ahora.getDate()}`;let H={};try{H=JSON.parse(localStorage.getItem('historial-frases')||'{}')}catch(e){}let i=H[key]?.i??ahora.getDate()%F.length,t=H[key]?.t??ahora.getDate()%T.length,img=null;const c=document.getElementById('c'),g=c.getContext('2d'),marca=document.getElementById('m'),estado=document.getElementById('s');
+function lineas(txt,max){let a=[],l='';for(const p of txt.split(' ')){let z=(l+' '+p).trim();if(g.measureText(z).width>max&&l){a.push(l);l=p}else l=z}a.push(l);return a}function draw(){const p=T[t];if(img){let e=Math.max(1080/img.width,1080/img.height),w=img.width*e,h=img.height*e;g.drawImage(img,(1080-w)/2,(1080-h)/2,w,h);g.fillStyle='rgba(0,0,0,.48)';g.fillRect(0,0,1080,1080)}else{let z=g.createLinearGradient(0,0,1080,1080);z.addColorStop(0,p[0]);z.addColorStop(1,p[1]);g.fillStyle=z;g.fillRect(0,0,1080,1080)}g.strokeStyle='#ffffff88';g.lineWidth=2;g.strokeRect(60,60,960,960);g.textAlign='center';g.fillStyle=p[2];g.font='bold 43px Arial';g.fillText(D[ahora.getDay()].toUpperCase(),540,180);g.fillStyle='white';g.font='32px Arial';g.fillText(`${ahora.getDate()} de ${M[ahora.getMonth()]} de ${ahora.getFullYear()}`,540,235);g.font='bold 60px Georgia';let L=lineas(F[i],820),y=520-(L.length-1)*40;L.forEach((v,n)=>g.fillText(v,540,y+n*80));g.fillStyle=p[2];g.fillRect(440,805,200,4);g.fillStyle='white';g.font='bold 30px Arial';g.fillText(marca.value||'Inspira tu día',540,885);g.font='22px Arial';g.fillText('Una pausa para recordar lo importante',540,930);H[key]={i,t};localStorage.setItem('historial-frases',JSON.stringify(H))}
+document.getElementById('f').onchange=e=>{let file=e.target.files[0];if(!file)return;let n=new Image();n.onload=()=>{img=n;draw();estado.textContent='Imagen de fondo agregada.'};n.src=URL.createObjectURL(file)};document.getElementById('q').onclick=()=>{img=null;document.getElementById('f').value='';draw()};document.getElementById('x').onclick=()=>{let used=new Set(Object.values(H).map(v=>v.i)),a=F.map((_,n)=>n).filter(n=>!used.has(n));if(!a.length)a=F.map((_,n)=>n);i=a[Math.floor(Math.random()*a.length)];t=(t+1)%T.length;draw()};document.getElementById('d').onclick=()=>{let a=document.createElement('a');a.download=`frase-${key}.png`;a.href=c.toDataURL('image/png');a.click()};marca.oninput=draw;draw();
+</script></body></html>
