@@ -1,0 +1,42 @@
+name: Generar y publicar imagen diaria
+
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar imagen del día
+        run: python generar_diario.py
+
+      - name: Publicar en Facebook
+        env:
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: v26.0
+        run: python publicar_facebook.py
+
+      - name: Guardar resultado en GitHub
+        run: |
+          git config user.name "generador-diario"
+          git config user.email "actions@users.noreply.github.com"
+          git add imagen-del-dia.png publicacion-del-dia.txt
+          git diff --cached --quiet || git commit -m "Generar publicación diaria"
+          git push
