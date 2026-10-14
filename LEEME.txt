@@ -1,1 +1,2 @@
-Sube index.html y la carpeta fondos directamente a la raiz de tu repositorio. Reemplaza el index.html existente.
+MEJORA 365 FRASES
+Sube index.html, frases-365.json y la carpeta fondos directamente a la raiz del repositorio. Reemplaza los archivos existentes.
