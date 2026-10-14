@@ -1,0 +1,1 @@
+Sube index.html y la carpeta fondos directamente a la raiz de tu repositorio. Reemplaza el index.html existente.
