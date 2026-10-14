@@ -68,7 +68,13 @@ if proc.returncode: raise SystemExit('FFmpeg no pudo crear el video base')
 # Create a short original piano melody as MIDI.
 mid=MidiFile(ticks_per_beat=480); tr=MidiTrack(); mid.tracks.append(tr)
 tr.append(MetaMessage('set_tempo',tempo=bpm2tempo(84),time=0)); tr.append(Message('program_change',program=0,time=0))
-melody=[60,64,67,72,69,67,64,62,60,64,67,71,69,65,64,62,60,67,64,60]
+melodias=[
+ [60,64,67,72,69,67,64,62,60,64,67,71,69,65,64,62,60,67,64,60],
+ [57,60,64,69,67,64,60,59,57,60,64,67,65,64,62,60,57,64,60,57],
+ [53,57,60,65,64,60,57,55,53,57,60,64,62,60,57,55,53,60,57,53],
+ [55,59,62,67,64,62,59,57,55,59,62,66,64,62,60,59,55,62,59,55],
+]
+melody=melodias[(hoy.timetuple().tm_yday-1)%len(melodias)]
 beats=.75
 for note in melody:
  tr.append(Message('note_on',note=note,velocity=54,time=0))
