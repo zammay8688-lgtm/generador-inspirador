@@ -1,0 +1,47 @@
+name: Publicar video diario en Facebook
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publicar-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar video y piano
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fluidsynth fluid-soundfont-gm
+          pip install -r requirements-video.txt
+
+      - name: Generar texto de la publicación
+        run: python generar_diario.py
+
+      - name: Crear video con pista de piano rotativa
+        run: python crear_video.py
+
+      - name: Publicar video en Facebook
+        env:
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+          META_GRAPH_VERSION: v26.0
+        run: python publicar_video_facebook.py
+
+      - name: Guardar copia del video por 7 días
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-publicado-del-dia
+          path: video-del-dia.mp4
+          retention-days: 7
