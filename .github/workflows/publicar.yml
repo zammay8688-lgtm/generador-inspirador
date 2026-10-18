@@ -39,8 +39,8 @@ jobs:
 
       - name: Generar imagen unica y publicar
         env:
-          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
-          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
           FB_API_VERSION: v25.0
           BRAND: "Poema del Alma"
           IMAGE_INDEX: ${{ inputs.image_index }}
