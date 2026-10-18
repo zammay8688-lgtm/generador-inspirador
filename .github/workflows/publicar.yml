@@ -2,10 +2,14 @@ name: Reflexiones Facebook 2000
 
 on:
   schedule:
-    - cron: "0 2 * * *"
-    - cron: "0 14 * * *"
-    - cron: "0 18 * * *"
-    - cron: "0 22 * * *"
+    - cron: "0 6 * * *"   # 00:00 CDMX
+    - cron: "0 9 * * *"   # 03:00 CDMX
+    - cron: "0 12 * * *"  # 06:00 CDMX
+    - cron: "0 15 * * *"  # 09:00 CDMX
+    - cron: "0 18 * * *"  # 12:00 CDMX
+    - cron: "0 21 * * *"  # 15:00 CDMX
+    - cron: "0 0 * * *"   # 18:00 CDMX
+    - cron: "0 3 * * *"   # 21:00 CDMX
 
   workflow_dispatch:
     inputs:
