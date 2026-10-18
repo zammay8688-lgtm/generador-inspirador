@@ -1,0 +1,6 @@
+REFLEXIONES FACEBOOK 2000
+
+1. Sube esta carpeta a GitHub.
+2. Agrega FB_PAGE_ID y FB_PAGE_TOKEN en Secrets de Actions.
+3. Ejecuta Run workflow para probar.
+4. El sistema publicará 4 veces al día y recorrerá 2,000 diseños sin repetir.
