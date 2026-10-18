@@ -134,20 +134,16 @@ def hex_to_rgb(color):
 
 
 def content_index(now):
-    """
-    Selecciona uno de cuatro índices diarios según la hora local.
-
-    Horarios:
-    08:00
-    12:00
-    16:00
-    20:00
-
-    Con cuatro publicaciones al día, las 2,000 combinaciones
-    cubren 500 días antes de iniciar nuevamente el ciclo.
-    """
-
-    publication_hours = [8, 12, 16, 20]
+    publication_hours = [
+        0,
+        3,
+        6,
+        9,
+        12,
+        15,
+        18,
+        21,
+    ]
 
     slot = min(
         range(len(publication_hours)),
@@ -160,7 +156,7 @@ def content_index(now):
         now.date() - date(2026, 1, 1)
     ).days
 
-    return ((elapsed_days * 4) + slot) % 2000
+    return ((elapsed_days * 8) + slot) % 2000
 
 
 def make_quote(index):
@@ -177,7 +173,43 @@ def make_quote(index):
     closing = CLOSE[normalized_index % 10]
 
     return f"{opening} {core}, {closing}."
+    
+def wrap_text_by_width(
+    drawing,
+    text,
+    selected_font,
+    maximum_width,
+):
+    words = text.split()
+    lines = []
+    current_line = ""
 
+    for word in words:
+        candidate = (
+            f"{current_line} {word}".strip()
+        )
+
+        box = drawing.textbbox(
+            (0, 0),
+            candidate,
+            font=selected_font,
+        )
+
+        candidate_width = box[2] - box[0]
+
+        if (
+            candidate_width <= maximum_width
+            or not current_line
+        ):
+            current_line = candidate
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    if current_line:
+        lines.append(current_line)
+
+    return lines
 
 def render(now, index, brand):
     quote = make_quote(index)
@@ -271,40 +303,54 @@ def render(now, index, brand):
             width=2,
         )
 
+
+
     quoted_text = f"“{quote}”"
-    font_size = 64
 
-    lines = textwrap.wrap(
-        quoted_text,
-        width=29,
-    )
+    font_size = 58
+    maximum_text_width = 760
+    maximum_lines = 7
 
-    while len(lines) > 7 and font_size > 40:
-        font_size -= 3
-
-        lines = textwrap.wrap(
-            quoted_text,
-            width=31,
+    while font_size >= 34:
+        quote_font = font(
+            font_size,
+            True,
         )
 
-    line_height = int(font_size * 1.28)
+        lines = wrap_text_by_width(
+            drawing,
+            quoted_text,
+            quote_font,
+            maximum_text_width,
+        )
+
+        if len(lines) <= maximum_lines:
+            break
+
+        font_size -= 2
+
+    line_height = int(font_size * 1.22)
+
+    total_text_height = (
+        len(lines) * line_height
+    )
 
     text_y = (
-        520
-        - ((len(lines) - 1) * line_height / 2)
+        535
+        - total_text_height / 2
+        + line_height / 2
     )
 
     for line in lines:
         drawing.text(
-            (540, text_y),
+            (540, int(text_y)),
             line,
-            font=font(font_size, True),
+            font=quote_font,
             fill=text_color,
             anchor="mm",
         )
 
-        text_y += line_height
-
+        text_y += line_height    
     theme = THEMES[
         index % len(THEMES)
     ]
