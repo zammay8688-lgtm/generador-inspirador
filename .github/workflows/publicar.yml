@@ -1,15 +1,16 @@
 name: Reflexiones Facebook 2000
 
 on:
-    schedule:
-    - cron: "0 2 * * *"   # 20:00 CDMX
-    - cron: "0 14 * * *"  # 08:00 CDMX
-    - cron: "0 18 * * *"  # 12:00 CDMX
-    - cron: "0 22 * * *"  # 16:00 CDMX
+  schedule:
+    - cron: "0 2 * * *"
+    - cron: "0 14 * * *"
+    - cron: "0 18 * * *"
+    - cron: "0 22 * * *"
+
   workflow_dispatch:
     inputs:
       image_index:
-        description: "Índice opcional de 0 a 1999"
+        description: "Indice opcional de 0 a 1999"
         required: false
         type: string
 
@@ -36,7 +37,7 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
-      - name: Generar imagen única y publicar
+      - name: Generar imagen unica y publicar
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
@@ -52,7 +53,3 @@ jobs:
           name: reflexion-${{ github.run_id }}
           path: reflexion.png
           if-no-files-found: ignore
-        with:
-          name: reflexion-${{ github.run_id }}
-          path: reflexion.png
-        if-no-files-found: ignore
