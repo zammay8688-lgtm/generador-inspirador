@@ -1,0 +1,58 @@
+name: Reflexiones Facebook 2000
+
+on:
+    schedule:
+    - cron: "0 2 * * *"   # 20:00 CDMX
+    - cron: "0 14 * * *"  # 08:00 CDMX
+    - cron: "0 18 * * *"  # 12:00 CDMX
+    - cron: "0 22 * * *"  # 16:00 CDMX
+  workflow_dispatch:
+    inputs:
+      image_index:
+        description: "Índice opcional de 0 a 1999"
+        required: false
+        type: string
+
+concurrency:
+  group: reflexiones-facebook
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Descargar archivos
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar imagen única y publicar
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_API_VERSION: v25.0
+          BRAND: "Poema del Alma"
+          IMAGE_INDEX: ${{ inputs.image_index }}
+        run: python publicar.py
+
+      - name: Guardar imagen como evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reflexion-${{ github.run_id }}
+          path: reflexion.png
+          if-no-files-found: ignore
+        with:
+          name: reflexion-${{ github.run_id }}
+          path: reflexion.png
+        if-no-files-found: ignore
